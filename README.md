@@ -148,3 +148,50 @@ python verify_app.py
 ### 3. Reports & Analytics (`/reports`)
 - `GET /reports/summary`: Fetch metrics reporting panel (Admin only).
   - Returns: Total tickets count, status counts, priority counts, unassigned tickets, and assignment counts for all admins.
+
+---
+
+## Deployment on Render
+
+This repository is ready to be deployed directly to [Render](https://render.com) using either the **Render Blueprint (Infrastructure as Code)** method (recommended) or manual configuration.
+
+### Option A: Deploy using Render Blueprint (Recommended)
+
+Render Blueprints allow you to provision both the Web Service (FastAPI) and the PostgreSQL database in one click:
+
+1. **Push your code to GitHub / GitLab**.
+2. Go to the [Render Dashboard](https://dashboard.render.com).
+3. Click **New** -> **Blueprint**.
+4. Connect your GitHub repository.
+5. Render will automatically detect the [render.yaml](file:///c:/Users/vsinn/Desktop/jwt_project/render.yaml) file.
+6. Click **Approve** to deploy.
+
+Render will automatically:
+- Provision a free PostgreSQL database (`ticket-db`).
+- Build your Python application and install all dependencies.
+- Auto-generate a secure `JWT_SECRET_KEY` environment variable.
+- Bind the database connection string to `DATABASE_URL`.
+- Start the FastAPI server using `uvicorn`.
+
+---
+
+### Option B: Manual Web Service Deployment (e.g. Using Supabase)
+
+If you prefer to connect to an external PostgreSQL database like **Supabase** (avoiding Render's free DB 90-day expiration):
+
+1. **Create a Web Service**:
+   - Go to [Render Dashboard](https://dashboard.render.com) -> **New** -> **Web Service**.
+   - Connect your GitHub repository.
+2. **Configure Service Details**:
+   - **Language**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+3. **Set Environment Variables**:
+   Add the following environment variables in the Render Dashboard (**Settings** -> **Environment**):
+   - `DATABASE_URL`: *Your Supabase PostgreSQL URI (e.g., transaction pooler URI).*
+   - `JWT_SECRET_KEY`: *A secure random hex string (generate using `openssl rand -hex 32` or similar).*
+   - `JWT_ALGORITHM`: `HS256`
+   - `ACCESS_TOKEN_EXPIRE_MINUTES`: `60`
+   - `PYTHON_VERSION`: `3.11.9` (or your preferred version)
+4. Click **Deploy Web Service**.
+
