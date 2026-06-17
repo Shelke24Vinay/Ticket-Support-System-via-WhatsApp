@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Support Ticket Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-headset accent-icon"></i>
+                <h1>Ticket<span>Support</span></h1>
+            </div>
+            <div class="user-status" id="user-status-container" style="display: none;">
+                <span class="user-badge">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <span id="header-user-name">Loading...</span>
+                    <span id="header-user-role" class="role-pill">Role</span>
+                </span>
+                <button id="logout-btn" class="btn btn-secondary-icon" title="Log Out">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- 1. Auth View -->
+            <section id="auth-view" class="view-panel active">
+                <div class="auth-card">
+                    <div class="auth-tabs">
+                        <button id="tab-login-btn" class="auth-tab active">Sign In</button>
+                        <button id="tab-register-btn" class="auth-tab">Sign Up</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="login-form" class="auth-form active">
+                        <h2>Welcome Back</h2>
+                        <p class="subtitle">Enter your credentials to access your ticket dashboard</p>
+
+                        <div class="form-group">
+                            <label for="login-email">Email Address</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-envelope input-icon"></i>
+                                <input type="email" id="login-email" required placeholder="name@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock input-icon"></i>
+                                <input type="password" id="login-password" required placeholder="••••••••">
+                            </div>
+                        </div>
+
+                        <div id="login-error" class="alert alert-danger" style="display: none;"></div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>Sign In</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="register-form" class="auth-form">
+                        <h2>Create Account</h2>
+                        <p class="subtitle">Get started by setting up your support credentials</p>
+
+                        <div class="form-group">
+                            <label for="register-name">Full Name</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-user input-icon"></i>
+                                <input type="text" id="register-name" required placeholder="John Doe">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-email">Email Address</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-envelope input-icon"></i>
+                                <input type="email" id="register-email" required placeholder="name@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock input-icon"></i>
+                                <input type="password" id="register-password" required
+                                    placeholder="At least 6 characters">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-role">Register As</label>
+                            <div class="role-selector">
+                                <label class="radio-card">
+                                    <input type="radio" name="register-role" value="customer" checked>
+                                    <span class="radio-content">
+                                        <i class="fa-solid fa-user-tag"></i>
+                                        <strong>Customer</strong>
+                                        <span>Raise tickets</span>
+                                    </span>
+                                </label>
+                                <label class="radio-card">
+                                    <input type="radio" name="register-role" value="admin">
+                                    <span class="radio-content">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                        <strong>Admin</strong>
+                                        <span>Manage tickets</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="register-error" class="alert alert-danger" style="display: none;"></div>
+                        <div id="register-success" class="alert alert-success" style="display: none;"></div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>Create Account</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 2. Customer View -->
+            <section id="customer-view" class="view-panel">
+                <div class="dashboard-grid">
+                    <!-- Raise Ticket Column -->
+                    <div class="dashboard-col-left">
+                        <div class="card glass-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-pen-to-square card-icon"></i>
+                                <h2>Submit a New Ticket</h2>
+                            </div>
+                            <form id="raise-ticket-form">
+                                <div class="form-group">
+                                    <label for="ticket-title">Ticket Title</label>
+                                    <input type="text" id="ticket-title" required
+                                        placeholder="Brief summary of the issue (e.g. Supabase Connection Error)">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ticket-description">Describe the Issue</label>
+                                    <textarea id="ticket-description" rows="5" required
+                                        placeholder="Detailed steps, errors encountered, or comments..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ticket-priority">Priority</label>
+                                    <select id="ticket-priority">
+                                        <option value="low">Low (General Query)</option>
+                                        <option value="medium" selected>Medium (Standard Issue)</option>
+                                        <option value="high">High (Service Blocked)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    Submit Support Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tickets List Column -->
+                    <div class="dashboard-col-right">
+                        <div class="section-title-bar">
+                            <h2>My Active Tickets</h2>
+                            <span class="count-badge" id="customer-ticket-count">0</span>
+                        </div>
+
+                        <div id="customer-tickets-container" class="tickets-list">
+                            <!-- JS Inject Tickets -->
+                            <div class="empty-state">
+                                <i class="fa-solid fa-ticket-simple"></i>
+                                <p>You have not raised any support requests yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Admin View -->
+            <section id="admin-view" class="view-panel">
+                <!-- Analytics Panel -->
+                <div class="analytics-grid" id="analytics-container">
+                    <div class="analytics-card accent-blue">
+                        <div class="icon-box"><i class="fa-solid fa-folder-open"></i></div>
+                        <div class="data">
+                            <h3 id="stat-total">0</h3>
+                            <span>Total Tickets</span>
+                        </div>
+                    </div>
+                    <div class="analytics-card accent-orange">
+                        <div class="icon-box"><i class="fa-solid fa-spinner"></i></div>
+                        <div class="data">
+                            <h3 id="stat-in-progress">0</h3>
+                            <span>In Progress</span>
+                        </div>
+                    </div>
+                    <div class="analytics-card accent-green">
+                        <div class="icon-box"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="data">
+                            <h3 id="stat-resolved">0</h3>
+                            <span>Resolved</span>
+                        </div>
+                    </div>
+                    <div class="analytics-card accent-red">
+                        <div class="icon-box"><i class="fa-solid fa-user-slash"></i></div>
+                        <div class="data">
+                            <h3 id="stat-unassigned">0</h3>
+                            <span>Unassigned</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-workspace-grid">
+                    <!-- Admin Tickets Table/List -->
+                    <div class="admin-col-left">
+                        <div class="admin-filters card glass-card">
+                            <div class="filters-row">
+                                <div class="filter-group">
+                                    <label><i class="fa-solid fa-filter"></i> Status</label>
+                                    <select id="filter-status">
+                                        <option value="">All Statuses</option>
+                                        <option value="open">Open</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="resolved">Resolved</option>
+                                        <option value="closed">Closed</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label><i class="fa-solid fa-arrow-down-up-across-line"></i> Priority</label>
+                                    <select id="filter-priority">
+                                        <option value="">All Priorities</option>
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label><i class="fa-solid fa-user-shield"></i> Agent Assignment</label>
+                                    <select id="filter-assignee">
+                                        <option value="">All Agents</option>
+                                        <!-- Inject Admins dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-title-bar">
+                            <h2>Customer Enquiries</h2>
+                            <span class="count-badge" id="admin-ticket-count">0</span>
+                        </div>
+
+                        <div id="admin-tickets-container" class="tickets-list">
+                            <!-- JS Inject Tickets -->
+                        </div>
+                    </div>
+
+                    <!-- Workload Distribution Column -->
+                    <div class="admin-col-right">
+                        <div class="card glass-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-chart-bar card-icon"></i>
+                                <h2>Team Assignment Workload</h2>
+                            </div>
+                            <div class="agent-distribution-list" id="agent-workload-container">
+                                <!-- JS Inject Agent Workload -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Ticket Detail Modal / Drawer -->
+    <div id="ticket-modal" class="modal-backdrop">
+        <div class="modal-card glass-modal">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <span class="ticket-id-tag">TICKET #<span id="modal-ticket-id">0</span></span>
+                    <h2 id="modal-ticket-title">Ticket Title</h2>
+                </div>
+                <button class="modal-close-btn" id="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <!-- Ticket Core Details -->
+                    <div class="modal-ticket-main">
+                        <div class="ticket-description-box">
+                            <h3>Description</h3>
+                            <p id="modal-ticket-desc">Ticket description content goes here.</p>
+                        </div>
+
+                        <!-- Comments section -->
+                        <div class="comments-section">
+                            <h3>Discussion Thread</h3>
+                            <div class="comments-thread" id="modal-comments-thread">
+                                <!-- Inject Comments -->
+                            </div>
+                            <form id="comment-form" class="comment-input-area">
+                                <input type="text" id="comment-message" required
+                                    placeholder="Type a message or response...">
+                                <button type="submit" class="btn btn-primary btn-icon-only">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Side Control Panel -->
+                    <div class="modal-ticket-sidebar">
+                        <div class="meta-row">
+                            <span class="label">Priority</span>
+                            <div class="value" id="modal-priority-container">
+                                <!-- Inject badge -->
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <span class="label">Status</span>
+                            <div class="value" id="modal-status-container">
+                                <!-- Inject Badge or Select -->
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <span class="label">Raised By</span>
+                            <div class="value">
+                                <strong id="modal-customer-name">Alice Smith</strong><br>
+                                <span id="modal-customer-email" class="sub">alice@example.com</span>
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <span class="label">Assigned Agent</span>
+                            <div class="value" id="modal-assignee-container">
+                                <!-- Inject Assignee details / assignment selector -->
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <span class="label">Created Date</span>
+                            <span class="value sub" id="modal-created-at">June 17, 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

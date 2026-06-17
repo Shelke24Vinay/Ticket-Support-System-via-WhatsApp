@@ -1,0 +1,16 @@
+{
+  "name": "whatsapp-support-bot",
+  "version": "1.0.0",
+  "description": "WhatsApp Bot integration using Baileys to raise customer tickets",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.6.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "pino": "^9.0.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
