@@ -36,6 +36,11 @@ let globalSock = null;
 let ws = null;
 
 function setupWebSocket() {
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+        console.log('Backend WebSocket is already open or connecting. Skipping duplicate setup.');
+        return;
+    }
+
     if (ws) {
         try {
             ws.close();
@@ -121,8 +126,16 @@ async function handleWebSocketEvent(event) {
     }
 }
 
+let isConnecting = false;
+
 // Main socket connection
 async function connectToWhatsApp() {
+    if (isConnecting) {
+        console.log('connectToWhatsApp is already in progress. Skipping duplicate execution.');
+        return;
+    }
+    isConnecting = true;
+
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
 
     // Dynamically fetch latest WhatsApp Web version to prevent 405 Method Not Allowed failures
@@ -155,13 +168,24 @@ async function connectToWhatsApp() {
         
         if (connection === 'close') {
             console.log('Disconnect error details:', lastDisconnect?.error);
-            const statusCode = lastDisconnect.error?.output?.statusCode;
+            
+            const error = lastDisconnect?.error;
+            const errorStr = error ? String(error.stack || error.message || error) : '';
+            const errorDataStr = error?.data ? JSON.stringify(error.data) : '';
+            const statusCode = error?.output?.statusCode;
+            
             const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+            const isBadMac = errorStr.includes('Bad MAC') || 
+                             errorStr.includes('decryption') || 
+                             errorDataStr.includes('Bad MAC') ||
+                             errorDataStr.includes('decryption');
             
-            console.log('WhatsApp connection closed. Reconnecting:', !isLoggedOut);
+            console.log('WhatsApp connection closed. Reconnecting:', !isLoggedOut && !isBadMac);
             
-            if (isLoggedOut) {
-                console.log('Session has been logged out or is invalid (401). Clearing auth cache...');
+            isConnecting = false; // Reset connection flag so we can retry connecting
+            
+            if (isLoggedOut || isBadMac) {
+                console.log('Session has been logged out, is invalid (401), or has corrupted keys (Bad MAC). Clearing auth cache...');
                 try {
                     fs.rmSync(path.join(__dirname, 'auth_info_baileys'), { recursive: true, force: true });
                     console.log('Auth cache cleared. Reconnecting to generate fresh QR code in 2 seconds...');
@@ -177,6 +201,7 @@ async function connectToWhatsApp() {
             console.log('\n============================================================');
             console.log('WHATSAPP BOT SUCCESSFULLY LOGGED IN & ACTIVE!');
             console.log('============================================================\n');
+            isConnecting = false; // Reset connection state upon successful handshake
             setupWebSocket();
         }
     });
@@ -482,6 +507,40 @@ async function handleMessage(sock, jid, text, senderName) {
         }
         return;
     }
+}
+
+// Global exception handlers to catch and resolve fatal "Bad MAC" errors
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    const errStr = String(err.stack || err.message || err);
+    if (errStr.includes('Bad MAC') || errStr.includes('decryption')) {
+        console.log('Critical decryption failure (Bad MAC) detected globally.');
+        clearAuthCacheAndExit();
+    }
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection:', reason);
+    const errStr = String(reason?.stack || reason?.message || reason);
+    if (errStr.includes('Bad MAC') || errStr.includes('decryption')) {
+        console.log('Critical decryption failure (Bad MAC) detected globally.');
+        clearAuthCacheAndExit();
+    }
+});
+
+function clearAuthCacheAndExit() {
+    console.log('Clearing auth cache folder to force a new QR code on restart...');
+    try {
+        const authPath = path.join(__dirname, 'auth_info_baileys');
+        if (fs.existsSync(authPath)) {
+            fs.rmSync(authPath, { recursive: true, force: true });
+            console.log('Auth cache folder deleted successfully.');
+        }
+    } catch (e) {
+        console.error('Failed to delete auth cache folder:', e);
+    }
+    console.log('Exiting process to allow supervisor to restart the service...');
+    process.exit(1);
 }
 
 // Start bot connection
